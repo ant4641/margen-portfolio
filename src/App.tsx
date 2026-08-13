@@ -6,7 +6,6 @@ import { TechStackMatrix } from './components/TechStackMatrix';
 import { SideProjectSection } from './components/SideProjectSection';
 import { HighlightDetailModal } from './components/HighlightDetailModal';
 import { ExpoCardModal } from './components/ExpoCardModal';
-import { AiAssistantModal } from './components/AiAssistantModal';
 import { Footer } from './components/Footer';
 import { HighlightProject, ESSENTIAL_HIGHLIGHTS } from './data/resumeData';
 
@@ -15,7 +14,6 @@ export default function App() {
   const [targetExpId, setTargetExpId] = useState<string | null>(null);
   const [selectedHighlight, setSelectedHighlight] = useState<HighlightProject | null>(null);
   const [expoModalOpen, setExpoModalOpen] = useState<boolean>(false);
-  const [aiModalOpen, setAiModalOpen] = useState<boolean>(false);
 
   const handleNavigateToExperience = (expId: string) => {
     setTargetExpId(expId);
@@ -30,7 +28,6 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenExpoModal={() => setExpoModalOpen(true)}
-        onOpenAiModal={() => setAiModalOpen(true)}
       />
 
       {/* Main Container */}
@@ -41,7 +38,6 @@ export default function App() {
             onNavigateTab={(tab) => setActiveTab(tab)}
             onNavigateToExperience={handleNavigateToExperience}
             onOpenExpoModal={() => setExpoModalOpen(true)}
-            onOpenAiModal={() => setAiModalOpen(true)}
           />
         )}
 
@@ -71,11 +67,6 @@ export default function App() {
       <ExpoCardModal
         isOpen={expoModalOpen}
         onClose={() => setExpoModalOpen(false)}
-      />
-
-      <AiAssistantModal
-        isOpen={aiModalOpen}
-        onClose={() => setAiModalOpen(false)}
       />
 
     </div>

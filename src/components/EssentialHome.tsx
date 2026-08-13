@@ -28,7 +28,6 @@ interface EssentialHomeProps {
   onNavigateTab: (tabId: string) => void;
   onNavigateToExperience: (expId: string) => void;
   onOpenExpoModal: () => void;
-  onOpenAiModal: () => void;
 }
 
 export const EssentialHome: React.FC<EssentialHomeProps> = ({
@@ -36,7 +35,6 @@ export const EssentialHome: React.FC<EssentialHomeProps> = ({
   onNavigateTab,
   onNavigateToExperience,
   onOpenExpoModal,
-  onOpenAiModal,
 }) => {
   return (
     <div className="space-y-12 sm:space-y-16 pb-12">

@@ -4,13 +4,11 @@ import {
   Briefcase, 
   Award, 
   Code2, 
-  Bot, 
   QrCode, 
   Menu, 
   X, 
   ChevronRight,
-  UserCheck,
-  Zap
+  UserCheck
 } from 'lucide-react';
 import { MARGEN_PROFILE } from '../data/resumeData';
 
@@ -18,14 +16,12 @@ interface NavbarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   onOpenExpoModal: () => void;
-  onOpenAiModal: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   setActiveTab,
   onOpenExpoModal,
-  onOpenAiModal,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -89,7 +85,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             })}
           </nav>
 
-          {/* Quick Action Buttons (Expo Mode & AI Agent) */}
+          {/* Quick Action Buttons (Expo Mode) */}
           <div className="hidden sm:flex items-center gap-2 font-mono">
             <button
               onClick={onOpenExpoModal}
@@ -99,26 +95,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               <QrCode className="w-3.5 h-3.5 text-emerald-400" />
               <span>展場名片</span>
             </button>
-
-            <button
-              onClick={onOpenAiModal}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-slate-950 text-xs font-bold transition-all shadow-sm shadow-emerald-500/20"
-            >
-              <Zap className="w-3.5 h-3.5 text-slate-950 fill-slate-950" />
-              <span>AI 履歷小幫手</span>
-            </button>
           </div>
 
           {/* Mobile Menu Button */}
           <div className="flex items-center gap-2 lg:hidden">
-            <button
-              onClick={onOpenAiModal}
-              className="p-2 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 text-xs font-mono font-medium flex items-center gap-1"
-            >
-              <Bot className="w-4 h-4 text-emerald-400" />
-              <span className="sm:hidden">AI 問答</span>
-            </button>
-
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded text-slate-300 hover:text-white hover:bg-[#131720] focus:outline-none border border-[#2D3748]"

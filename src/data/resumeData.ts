@@ -232,7 +232,7 @@ export const WORK_HISTORY: WorkExperience[] = [
           "主導第三方支付技術分享，撰寫文件，向跨團隊簡報分享，提升後續擴充效率。",
           "開發營運 CMS 模組，自訂公告與橫幅發布功能，降低高頻動態查詢對主資料庫的負載。"
         ],
-        techStack: ["PHP (Laravel)", "Paysafe", "Webhook", "MySQL", "Redis", "CMS", "Git"]
+        techStack: ["Java (Spring Boot)", "Redis", "Git"]
       }
     ]
   },

@@ -22,7 +22,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#0F1115] text-[#E2E8F0] font-sans selection:bg-emerald-500 selection:text-slate-950 bg-geometric-grid">
-      
+
       {/* Top Navbar */}
       <Navbar
         activeTab={activeTab}

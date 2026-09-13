@@ -152,14 +152,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
-            {/* Expo Digital Card Button */}
+            {/* Interactive Digital Card Button */}
             <button
               onClick={onOpenExpoModal}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#131720] hover:bg-emerald-950/60 border border-[#2D3748] hover:border-emerald-600/60 text-emerald-400 text-xs font-semibold transition-all"
-              title="資訊展現場名片 & QR Code"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#131720] hover:bg-emerald-950/60 border border-[#2D3748] hover:border-emerald-600/60 text-emerald-400 text-xs font-semibold transition-all cursor-pointer"
+              title="個人數位互動名片 & QR Code"
             >
               <QrCode className="w-3.5 h-3.5 text-emerald-400" />
-              <span>展場名片</span>
+              <span>互動名片</span>
             </button>
 
             {/* Mobile Menu Button */}
@@ -256,10 +256,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onOpenExpoModal();
                 setMobileMenuOpen(false);
               }}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded bg-[#131720] text-emerald-400 border border-[#2D3748] font-medium text-xs"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded bg-[#131720] text-emerald-400 border border-[#2D3748] font-medium text-xs cursor-pointer"
             >
               <QrCode className="w-4 h-4 text-emerald-400" />
-              <span>打開資訊展 數位名片 & QR</span>
+              <span>打開數位互動名片 & QR</span>
             </button>
           </div>
         </div>

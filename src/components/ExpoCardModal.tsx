@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 import profileImg from '../assets/profile.jpg';
 import { MARGEN_PROFILE } from '../data/resumeData';
-import { X, Copy, Check, Mail, Phone, ExternalLink, Sparkles, QrCode } from 'lucide-react';
+import { X, Copy, Check, Mail, Phone, ExternalLink, Sparkles, QrCode, Linkedin } from 'lucide-react';
 
 interface ExpoCardModalProps {
   isOpen: boolean;
@@ -49,7 +49,7 @@ export const ExpoCardModal: React.FC<ExpoCardModalProps> = ({ isOpen, onClose })
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded bg-[#131720] text-slate-400 hover:text-white border border-[#2D3748] transition-colors"
+          className="absolute top-4 right-4 p-2 rounded bg-[#131720] text-slate-400 hover:text-white border border-[#2D3748] transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -58,7 +58,7 @@ export const ExpoCardModal: React.FC<ExpoCardModalProps> = ({ isOpen, onClose })
         <div className="text-center space-y-3 pt-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 text-xs font-mono">
             <QrCode className="w-3.5 h-3.5 text-emerald-400" />
-            <span>資訊展現場互動名片</span>
+            <span>個人數位互動名片</span>
           </div>
 
           <div className="flex justify-center pt-1">
@@ -103,11 +103,23 @@ export const ExpoCardModal: React.FC<ExpoCardModalProps> = ({ isOpen, onClose })
         <div className="space-y-2 font-mono">
           <button
             onClick={handleCopy}
-            className="w-full py-2.5 px-4 rounded bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/20"
+            className="w-full py-2.5 px-4 rounded bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/20 cursor-pointer"
           >
             {copied ? <Check className="w-4 h-4 text-slate-950" /> : <Copy className="w-4 h-4" />}
             <span>{copied ? '已複製網站連結！' : '複製個人網站連結'}</span>
           </button>
+
+          {/* LinkedIn Profile Button */}
+          <a
+            href="https://www.linkedin.com/in/margen-lin/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full py-2.5 px-4 rounded bg-[#0A66C2] hover:bg-[#004182] text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-blue-500/20 group"
+          >
+            <Linkedin className="w-4 h-4 text-white" />
+            <span>造訪 LinkedIn 個人檔案</span>
+            <ExternalLink className="w-3.5 h-3.5 text-white/80 group-hover:translate-x-0.5 transition-transform" />
+          </a>
 
           <div className="grid grid-cols-2 gap-2 pt-1 font-sans">
             <a

@@ -113,7 +113,7 @@ export const ESSENTIAL_HIGHLIGHTS: HighlightProject[] = [
     tag: "高併發與大數據架構",
     title: "集中式日誌管理平台 — 重構與高併發壓測",
     subtitle: "解決 Race Condition、實現零鎖表備份與 1,680 萬筆資料 100% 零掉單",
-    period: "2025/07 – 2026/07",
+    period: "2025/07 – 2026/08",
     companyRole: "全端工程師 • 專案開發",
     impactMetrics: [
       { label: "Kafka 磁碟空間節省", value: "85%", badge: "成本優化" },
@@ -212,8 +212,8 @@ export const WORK_HISTORY: WorkExperience[] = [
     id: "exp-1",
     role: "全端工程師",
     company: "專案開發",
-    period: "2025/07 – 2026/07",
-    duration: "1年",
+    period: "2025/07 – 2026/08",
+    duration: "1年1個月",
     projects: [
       {
         title: "【集中式日誌管理平台開發與維運】",

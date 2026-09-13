@@ -62,7 +62,7 @@ export const MARGEN_PROFILE = {
       icon: "Cpu",
       summary: "深耕 Java (Spring Boot) 與 PHP (Laravel)，熟稔 MariaDB Slave MVCC 零鎖表備份、Kafka/ELK 1GB 壓力測試與 85% 磁碟空間節省，達成 1,680 萬筆資料 100% 零掉單無損寫入。",
       relatedWorks: [
-        { name: "日誌監控服務商", expId: "exp-1" },
+        { name: "專案開發", expId: "exp-1" },
         { name: "口袋證券", expId: "exp-2" }
       ]
     },
@@ -79,7 +79,7 @@ export const MARGEN_PROFILE = {
       icon: "Compass",
       summary: "具備扎實 SDLC 規範與系統流程圖繪製能力。接到需求時能從需求者與使用者角度出發，將功能規格、邊界條件 (Edge Cases) 與未來架構擴充性預先考量妥當。",
       relatedWorks: [
-        { name: "日誌監控服務商", expId: "exp-1" },
+        { name: "專案開發", expId: "exp-1" },
         { name: "口袋證券", expId: "exp-2" },
         { name: "集星網路", expId: "exp-3" },
         { name: "艾普特媒體", expId: "exp-5" }
@@ -90,7 +90,7 @@ export const MARGEN_PROFILE = {
       icon: "TrendingUp",
       summary: "具備招募顧問與 IT 自動化諮詢經驗，理解商業流程與招募邏輯。能主導繪製 Use Case 流程圖，搭起技術與業務橋樑，精準降低需求不符產生的返工率。",
       relatedWorks: [
-        { name: "日誌監控服務商", expId: "exp-1" },
+        { name: "專案開發", expId: "exp-1" },
         { name: "口袋證券", expId: "exp-2" },
         { name: "集星網路", expId: "exp-3" },
         { name: "職涯顧問", expId: "exp-4" },
@@ -113,8 +113,8 @@ export const ESSENTIAL_HIGHLIGHTS: HighlightProject[] = [
     tag: "高併發與大數據架構",
     title: "集中式日誌管理平台 — 重構與高併發壓測",
     subtitle: "解決 Race Condition、實現零鎖表備份與 1,680 萬筆資料 100% 零掉單",
-    period: "2026/04 - Present",
-    companyRole: "全端工程師 • 日誌監控與告警系統服務商",
+    period: "2025/07 – 2026/07",
+    companyRole: "全端工程師 • 專案開發",
     impactMetrics: [
       { label: "Kafka 磁碟空間節省", value: "85%", badge: "成本優化" },
       { label: "叢集同步穩定度", value: "90%", badge: "系統穩定" },
@@ -211,19 +211,28 @@ export const WORK_HISTORY: WorkExperience[] = [
   {
     id: "exp-1",
     role: "全端工程師",
-    company: "日誌監控與告警系統服務商",
-    period: "4月 2026 - Present",
-    duration: "在職中",
+    company: "專案開發",
+    period: "2025/07 – 2026/07",
+    duration: "1年",
     projects: [
       {
-        title: "【開發與維運集中式日誌管理平台】",
+        title: "【集中式日誌管理平台開發與維運】",
         highlights: [
-          "重構 MariaDB Slave 重建機制，引入一致性快照與 MVCC 機制實現線上零鎖表備份，解決 Race Condition 隱患，提升叢集同步穩定度達 90%",
-          "主導 Kafka/ELK 大數據管道 1GB 壓力測試與 Snappy 壓縮演算法評估，驗證可節省 85% Kafka 磁碟空間，並達成 1,680 萬筆資料 100% 零掉單無損寫入",
-          "主導修復 205 個 Unit/Feature Test 檔案（負責 60% 以上約 350 個 Method），強化 CI/CD 流程穩定度，並建立前端 Jest E2E 自動化測試鏈",
-          "重構全球極端時區（UTC-11~+14）告警時間錨點演算法；將 Elasticsearch 通訊升級為 HTTPS，以內外分離架構達成零效能損耗與憑證安全連線"
+          "重構 MariaDB Slave 重建機制，引入一致性快照與 MVCC 機制實現線上零鎖表備份，解決 Race Condition 隱患，提升叢集同步穩定度達 90%。",
+          "主導 Kafka/ELK 大數據管道 1GB 壓力測試與 Snappy 壓縮演算法評估，驗證可節省 85% Kafka 磁碟空間，並達成 1,680 萬筆資料 100% 零掉單無損寫入。",
+          "主導修復 205 個 Unit/Feature Test 檔案（負責 60% 以上約 350 個 Method），強化 CI/CD 流程穩定度，並建立前端 Jest E2E 自動化測試鏈。",
+          "重構全球極端時區（UTC-11~+14）告警時間錨點演算法；將 Elasticsearch 通訊升級為 HTTPS，以內外分離架構達成零效能損耗與憑證安全連線。"
         ],
         techStack: ["PHP (Laravel)", "ELK", "Kafka", "MariaDB", "Docker", "Shell Script", "Jest", "Git"]
+      },
+      {
+        title: "【會員系統與交易平台開發】",
+        highlights: [
+          "整合 Paysafe 多元支付，對接點數卡、電子錢包、銀行轉帳與行動支付儲值管道；實作 Webhook 非同步回呼與交易冪等性，確保點數入帳零重複、零掉單。",
+          "主導第三方支付技術分享，撰寫文件，向跨團隊簡報分享，提升後續擴充效率。",
+          "開發營運 CMS 模組，自訂公告與橫幅發布功能，降低高頻動態查詢對主資料庫的負載。"
+        ],
+        techStack: ["PHP (Laravel)", "Paysafe", "Webhook", "MySQL", "Redis", "CMS", "Git"]
       }
     ]
   },

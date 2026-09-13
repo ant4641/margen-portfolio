@@ -82,11 +82,8 @@ export const ExpoCardModal: React.FC<ExpoCardModalProps> = ({ isOpen, onClose })
         </div>
 
         {/* QR Code Canvas Frame */}
-        <div className="flex flex-col items-center justify-center p-4 bg-white rounded shadow-inner border border-slate-200 space-y-2">
+        <div className="flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-inner border border-slate-200">
           <canvas ref={canvasRef} className="rounded shadow" />
-          <p className="text-[11px] text-slate-700 font-semibold">
-            手機掃描即可開啟互動作品集
-          </p>
         </div>
 
         {/* Stats Summary Badge */}

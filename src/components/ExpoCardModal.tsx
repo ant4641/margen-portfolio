@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
+import profileImg from '../assets/profile.jpg';
 import { MARGEN_PROFILE } from '../data/resumeData';
 import { X, Copy, Check, Mail, Phone, ExternalLink, Sparkles, QrCode } from 'lucide-react';
 
@@ -43,7 +44,7 @@ export const ExpoCardModal: React.FC<ExpoCardModalProps> = ({ isOpen, onClose })
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0F1115]/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md bg-[#0A0C10] border border-[#2D3748] rounded-lg shadow-2xl overflow-hidden p-6 sm:p-8 space-y-6 font-sans">
+      <div className="relative w-full max-w-md bg-[#0A0C10] border border-[#2D3748] rounded-xl shadow-2xl overflow-hidden p-6 sm:p-8 space-y-6 font-sans">
         
         {/* Close button */}
         <button
@@ -53,18 +54,31 @@ export const ExpoCardModal: React.FC<ExpoCardModalProps> = ({ isOpen, onClose })
           <X className="w-5 h-5" />
         </button>
 
-        {/* Badge & Title */}
-        <div className="text-center space-y-2 pt-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 text-xs">
+        {/* Badge & Avatar & Title */}
+        <div className="text-center space-y-3 pt-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 text-xs font-mono">
             <QrCode className="w-3.5 h-3.5 text-emerald-400" />
             <span>資訊展現場互動名片</span>
           </div>
-          <h3 className="text-2xl font-bold text-white">
-            {MARGEN_PROFILE.name} ({MARGEN_PROFILE.englishName})
-          </h3>
-          <p className="text-xs text-emerald-400 font-bold">
-            {MARGEN_PROFILE.title}
-          </p>
+
+          <div className="flex justify-center pt-1">
+            <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-emerald-500/70 shadow-lg shadow-emerald-950/50">
+              <img
+                src={profileImg}
+                alt={MARGEN_PROFILE.name}
+                className="w-full h-full object-cover object-center"
+              />
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-2xl font-bold text-white">
+              {MARGEN_PROFILE.name} ({MARGEN_PROFILE.englishName})
+            </h3>
+            <p className="text-xs text-emerald-400 font-bold mt-0.5">
+              {MARGEN_PROFILE.title}
+            </p>
+          </div>
         </div>
 
         {/* QR Code Canvas Frame */}

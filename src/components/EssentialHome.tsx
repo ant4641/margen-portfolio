@@ -1,4 +1,5 @@
 import React from 'react';
+import profileImg from '../assets/profile.jpg';
 import { 
   MARGEN_PROFILE, 
   ESSENTIAL_HIGHLIGHTS, 
@@ -40,26 +41,61 @@ export const EssentialHome: React.FC<EssentialHomeProps> = ({
     <div className="space-y-12 sm:space-y-16 pb-12">
       
       {/* Hero Section: Geometric Balance High-Impact Personal Pitch */}
-      <section className="relative overflow-hidden rounded-lg bg-[#0A0C10] border border-[#2D3748] p-6 sm:p-10 lg:p-12 shadow-2xl">
-        {/* Subtle grid accent line */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+      <section className="relative overflow-hidden rounded-xl bg-[#0A0C10] border border-[#2D3748] p-6 sm:p-10 lg:p-12 shadow-2xl">
+        {/* Subtle grid accent & ambient lights */}
+        <div className="absolute top-0 left-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-80 h-80 bg-teal-500/5 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 max-w-4xl space-y-6">
+        <div className="relative z-10 space-y-8">
+          
+          {/* Top Row: Photo on Left + Introduction on Right */}
+          <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-8 lg:gap-12">
+            
+            {/* Left Column: Profile Image / Portrait */}
+            <div className="shrink-0 flex flex-col items-center md:items-start">
+              <div className="relative group">
+                {/* Glow accent */}
+                <div className="absolute -inset-1 bg-gradient-to-tr from-emerald-500/40 via-teal-500/20 to-emerald-400/40 rounded-2xl blur-md opacity-75 group-hover:opacity-100 transition duration-300" />
+                
+                {/* Photo Frame Container */}
+                <div className="relative w-48 h-56 sm:w-56 sm:h-64 lg:w-60 lg:h-72 rounded-2xl overflow-hidden bg-[#131720] border-2 border-emerald-500/40 shadow-2xl shadow-emerald-950/60">
+                  <img
+                    src={profileImg}
+                    alt={`${MARGEN_PROFILE.name} (${MARGEN_PROFILE.englishName})`}
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+              </div>
+            </div>
 
-          {/* Main Title & Tagline */}
-          <div className="space-y-3">
-            <h1 className="text-3xl sm:text-5xl font-bold text-white tracking-tight leading-tight">
-              {MARGEN_PROFILE.name} <span className="text-slate-400 font-normal text-2xl sm:text-4xl">({MARGEN_PROFILE.englishName})</span>
-            </h1>
-            <p className="text-lg sm:text-2xl font-bold text-emerald-400">
-              {MARGEN_PROFILE.title}
-            </p>
-          </div>
+            {/* Right Column: Text & Positioning */}
+            <div className="flex-1 space-y-5 w-full">
+              {/* Status Badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/70 border border-emerald-800/60 text-emerald-400 text-xs font-mono">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>5+ 年資深後端實戰 • 大型系統架構重構 • IoT 軟硬體整合</span>
+              </div>
 
-          {/* Core Philosophy Statement */}
-          <div className="p-4 sm:p-5 rounded bg-[#0F1115] border border-[#2D3748] text-slate-300 text-sm sm:text-base leading-relaxed">
-            <p className="font-bold text-emerald-400 mb-1 text-xs">🎯 核心定位與工程理念</p>
-            <p>{MARGEN_PROFILE.philosophy}</p>
+              {/* Main Title & Tagline */}
+              <div className="space-y-2">
+                <h1 className="text-3xl sm:text-5xl font-bold text-white tracking-tight leading-tight">
+                  {MARGEN_PROFILE.name} <span className="text-slate-400 font-normal text-2xl sm:text-4xl">({MARGEN_PROFILE.englishName})</span>
+                </h1>
+                <p className="text-lg sm:text-2xl font-bold text-emerald-400">
+                  {MARGEN_PROFILE.title}
+                </p>
+              </div>
+
+              {/* Core Philosophy Statement */}
+              <div className="p-4 sm:p-5 rounded-lg bg-[#0F1115] border border-[#2D3748] text-slate-300 text-sm sm:text-base leading-relaxed">
+                <p className="font-bold text-emerald-400 mb-1.5 text-xs flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>核心定位與工程理念</span>
+                </p>
+                <p>{MARGEN_PROFILE.philosophy}</p>
+              </div>
+            </div>
+
           </div>
 
           {/* Key Metrics Dashboard Row */}

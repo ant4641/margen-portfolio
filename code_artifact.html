@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>本地端個資匿名化工具 (Local Privacy Sanitizer)</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SheetJS for Excel & CSV handling -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Inter & Noto Sans TC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-200">
+          <i class="fa-solid fa-user-shield text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-slate-900 leading-tight">本地端個資匿名化工具</h1>
+          <p class="text-xs text-slate-500">Excel / CSV 智慧辨識・遮罩與泛化・隱私零上傳</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <i class="fa-solid fa-shield-halved mr-1.5 text-emerald-500"></i>
+          100% 瀏覽器本地運算
+        </span>
+        <button id="btnLoadDemo" class="px-3 py-1.5 text-xs font-semibold rounded-lg text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-colors">
+          <i class="fa-solid fa-flask mr-1"></i> 載入測試資料
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
+
+    <!-- Upload Section & Drop Area -->
+    <section id="uploadSection" class="bg-white rounded-2xl border-2 border-dashed border-slate-300 p-8 text-center hover:border-indigo-400 transition-all duration-200 cursor-pointer shadow-sm relative group">
+      <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+      <div class="max-w-md mx-auto flex flex-col items-center pointer-events-none">
+        <div class="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+          <i class="fa-solid fa-cloud-arrow-up text-3xl"></i>
+        </div>
+        <h3 class="text-base font-semibold text-slate-800 mb-1">點擊或將 Excel / CSV 檔案拖曳至此處</h3>
+        <p class="text-xs text-slate-500 mb-4">支援格式：.xlsx, .xls, .csv（UTF-8 / Big5 繁中支援）</p>
+        <div class="flex items-center text-xs text-slate-400 space-x-4">
+          <span><i class="fa-solid fa-check text-emerald-500 mr-1"></i> 不傳伺服器</span>
+          <span><i class="fa-solid fa-check text-emerald-500 mr-1"></i> 自動辨識身分證/電話</span>
+          <span><i class="fa-solid fa-check text-emerald-500 mr-1"></i> 多重泛化與遮罩</span>
+        </div>
+      </div>
+    </section>
+
+    <div id="statsSection" class="hidden grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+          <i class="fa-solid fa-file-lines"></i>
+        </div>
+        <div>
+          <div class="text-xs text-slate-500">檔名與總筆數</div>
+          <div id="statFileName" class="text-sm font-bold text-slate-800 truncate max-w-[140px]">未載入</div>
+          <div id="statRowCount" class="text-xs font-semibold text-blue-600">0 筆資料</div>
+        </div>
+      </div>
+
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div>
+          <div class="text-xs text-slate-500">偵測敏感欄位</div>
+          <div id="statSensitiveCols" class="text-base font-bold text-amber-600">0 個</div>
+          <div class="text-xs text-slate-400">系統自動識別</div>
+        </div>
+      </div>
+
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+          <i class="fa-solid fa-sliders"></i>
+        </div>
+        <div>
+          <div class="text-xs text-slate-500">已啟用去識別規則</div>
+          <div id="statActiveRules" class="text-base font-bold text-indigo-600">0 個</div>
+          <div class="text-xs text-slate-400">欄位設定保護</div>
+        </div>
+      </div>
+
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <div>
+          <div class="text-xs text-slate-500">隱私安全級別</div>
+          <div id="statPrivacyLevel" class="text-base font-bold text-emerald-600">中級保護</div>
+          <div class="text-xs text-slate-400">依據匿名化程度</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="configSection" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/70 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center space-x-2">
+          <h2 class="text-base font-bold text-slate-800">
+            <i class="fa-solid fa-list-check mr-2 text-indigo-600"></i>欄位去識別化策略設定
+          </h2>
+          <span class="text-xs bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full font-medium" id="ruleCountBadge">0 個欄位</span>
+        </div>
+        <div class="flex items-center flex-wrap gap-2">
+          <div class="flex items-center bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-600 shadow-sm">
+            <i class="fa-solid fa-key mr-1 text-amber-500"></i>
+            <span class="mr-1 font-medium">雜湊加鹽(Salt):</span>
+            <input id="hashSaltInput" type="text" placeholder="選填自訂鹽值" class="w-24 outline-none text-xs font-mono bg-transparent">
+          </div>
+          <button id="btnAutoApplyAll" class="text-xs px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm transition">
+            <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 套用建議
+          </button>
+          <button id="btnBatchTokenize" class="text-xs px-2.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-lg shadow-sm transition">
+            <i class="fa-solid fa-fingerprint mr-1"></i> 敏感欄位代碼化
+          </button>
+          <button id="btnBatchMask" class="text-xs px-2.5 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg shadow-sm transition">
+            <i class="fa-solid fa-mask mr-1"></i> 敏感欄位遮蔽
+          </button>
+          <button id="btnResetRules" class="text-xs px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium rounded-lg transition">
+            <i class="fa-solid fa-arrow-rotate-left mr-1"></i> 全部重設
+          </button>
+        </div>
+      </div>
+
+      <!-- Column Settings Grid / Table -->
+      <div class="overflow-x-auto max-h-96">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead class="bg-slate-100/90 text-slate-600 text-xs uppercase font-semibold sticky top-0 z-10">
+            <tr>
+              <th class="py-3 px-3">原始欄位</th>
+              <th class="py-3 px-3">自動識別特徵</th>
+              <th class="py-3 px-3 min-w-[130px]">去識別化策略類別</th>
+              <th class="py-3 px-3 min-w-[200px]">具體處理演算法</th>
+              <th class="py-3 px-3 min-w-[140px]">微調參數</th>
+              <th class="py-3 px-3">處理預覽 (第 1 筆)</th>
+            </tr>
+          </thead>
+          <tbody id="rulesTableBody" class="divide-y divide-slate-200 text-slate-700">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="previewSection" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+      <div class="px-6 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center space-x-4">
+          <h2 class="text-base font-bold text-slate-800">
+            <i class="fa-solid fa-table-columns mr-2 text-indigo-600"></i>資料處理結果預覽
+          </h2>
+          <!-- Toggle view mode -->
+          <div class="inline-flex rounded-lg border border-slate-200 bg-slate-100 p-1 text-xs">
+            <button id="tabPreviewSanitized" class="px-3 py-1 font-semibold rounded-md bg-white text-indigo-700 shadow-sm">
+              <i class="fa-solid fa-check-double mr-1 text-emerald-500"></i> 去識別化結果
+            </button>
+            <button id="tabPreviewOriginal" class="px-3 py-1 font-semibold rounded-md text-slate-600 hover:text-slate-900">
+              <i class="fa-solid fa-file-lines mr-1 text-slate-400"></i> 原始檔案對照
+            </button>
+          </div>
+        </div>
+
+        <!-- Export Buttons -->
+        <div class="flex items-center flex-wrap gap-2">
+          <button id="btnExportMapping" class="px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-semibold text-xs rounded-xl shadow-sm transition flex items-center space-x-1.5" title="匯出代碼化/假名化與原值的對照清單(供資安稽核或內部留存)">
+            <i class="fa-solid fa-key text-xs"></i>
+            <span>匯出代碼對照表 (CSV)</span>
+          </button>
+          <button id="btnExportExcel" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl shadow-sm hover:shadow transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-file-excel text-sm"></i>
+            <span>匯出 Excel (.xlsx)</span>
+          </button>
+          <button id="btnExportCSV" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs rounded-xl shadow-sm hover:shadow transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-file-csv text-sm"></i>
+            <span>匯出 CSV (UTF-8)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Table View -->
+      <div class="overflow-x-auto max-h-96 relative">
+        <table class="w-full text-left text-xs text-slate-700 border-collapse">
+          <thead id="previewTableHead" class="bg-slate-50 text-slate-600 font-semibold sticky top-0 border-b border-slate-200">
+            <!-- Dynamic Headers -->
+          </thead>
+          <tbody id="previewTableBody" class="divide-y divide-slate-100">
+            <!-- Dynamic Rows -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Preview Footer -->
+      <div class="px-6 py-3 border-t border-slate-200 bg-slate-50 text-xs text-slate-500 flex justify-between items-center">
+        <span id="previewRowInfo">顯示前 15 筆記錄預覽</span>
+        <span class="text-slate-400"><i class="fa-solid fa-circle-info mr-1"></i>匯出時將套用所有處理規則至整份檔案</span>
+      </div>
+    </div>
+
+  </main>
+
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-16 opacity-0 transition-all duration-300 pointer-events-none flex items-center bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-lg space-x-2">
+    <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+    <span id="toastMsg">操作成功</span>
+  </div>
+
+  <script>
+    // Global Application State
+    const AppState = {
+      rawFileName: '',
+      rawHeaders: [],
+      rawRows: [],          // Array of objects
+      columnConfigs: {},    // colName -> { detectedType, category, action, param, matchReason }
+      tokenMappings: {},    // colName -> { valToToken: Map, tokenToVal: Map, counter: 1 }
+      currentTab: 'sanitized', // 'sanitized' or 'original'
+      hashSalt: '',
+      dateShiftOffset: -17, // Deterministic shift offset for demonstration
+    };
+
+    // Strategy Categories Definition
+    const STRATEGY_CATEGORIES = {
+      KEEP: { label: '保留原值 (不處理)', icon: 'fa-check' },
+      MASK: { label: '部分遮蔽 (Masking)', icon: 'fa-mask' },
+      TOKENIZE: { label: '代碼化 / 假名化 (Tokenization)', icon: 'fa-fingerprint' },
+      HASH: { label: '安全雜湊 (Hashing)', icon: 'fa-hashtag' },
+      GENERALIZE: { label: '泛化處理 (Generalization)', icon: 'fa-chart-pie' },
+      SUPPRESS: { label: '欄位抑制 / 移除 (Suppression)', icon: 'fa-trash-can' }
+    };
+
+    // Concrete Actions per Category
+    const STRATEGY_ACTIONS = {
+      KEEP: [
+        { id: 'NONE', name: '保留原值 (不做任何異動)' }
+      ],
+      MASK: [
+        { id: 'MASK_AUTO', name: '智慧自動遮蔽 (依欄位特徵最適遮蔽)' },
+        { id: 'MASK_ID', name: '身分證遮蔽 (A12****789)' },
+        { id: 'MASK_PHONE', name: '手機中間遮蔽 (0912-***-678)' },
+        { id: 'MASK_EMAIL', name: '電子郵件遮蔽 (a***@domain.com)' },
+        { id: 'MASK_NAME', name: '中文姓名中間字遮蔽 (王*明 / 歐**明)' },
+        { id: 'MASK_CARD', name: '信用卡僅留後四碼 (****-****-****-1234)' },
+        { id: 'MASK_IP', name: 'IP 位址遮蔽末碼 (192.168.1.xxx)' },
+        { id: 'MASK_KEEP_START', name: '前綴保留，遮蔽後端 (自訂保留前 N 碼)' },
+        { id: 'MASK_KEEP_END', name: '後綴保留，遮蔽前端 (自訂保留後 N 碼)' },
+        { id: 'MASK_FULL', name: '全字元遮蔽 (固定長度遮罩)' }
+      ],
+      TOKENIZE: [
+        { id: 'TOKEN_SEQ', name: '流水代碼標籤 (同值同碼，如 ID_0001)' },
+        { id: 'TOKEN_UUID', name: '隨機短代碼 (如 TK-8F2B)' },
+        { id: 'TOKEN_PSEUDO_NAME', name: '虛擬化假名 (如 測試者A, 訪客01)' },
+        { id: 'TOKEN_CATEGORY', name: '群組標籤 (如 [群組-01])' }
+      ],
+      HASH: [
+        { id: 'HASH_SHA256_FULL', name: '不可逆 SHA-256 完整雜湊 (64字元)' },
+        { id: 'HASH_SHA256_SHORT', name: '不可逆 SHA-256 截短前 8 碼 (短標識)' },
+        { id: 'HASH_NUMERIC', name: '數值化雜湊碼 (轉為8位數字代碼)' }
+      ],
+      GENERALIZE: [
+        { id: 'GEN_DATE_YEAR', name: '日期泛化為年份 (1995年)' },
+        { id: 'GEN_DATE_MONTH', name: '日期泛化為年月 (1995-11)' },
+        { id: 'GEN_DATE_DECADE', name: '日期/出生泛化為年代 (1990s)' },
+        { id: 'GEN_DATE_SHIFT', name: '日期隨機平移 (保持間隔但平移日期)' },
+        { id: 'GEN_AGE_5Y', name: '年齡泛化為 5 歲區間 (25-29歲)' },
+        { id: 'GEN_AGE_10Y', name: '年齡泛化為 10 歲區間 (20-29歲)' },
+        { id: 'GEN_AGE_STAGE', name: '年齡層分類 (未成年/青年/中年/樂齡)' },
+        { id: 'GEN_ADDR_CITY', name: '地址泛化至縣市 (台北市***)' },
+        { id: 'GEN_ADDR_DIST', name: '地址泛化至行政區 (台北市信義區***)' },
+        { id: 'GEN_ADDR_POSTAL', name: '僅保留前三碼郵遞區號 (如 110***)' },
+        { id: 'GEN_NUM_100', name: '數值四捨五入至百位 (如 12,500)' },
+        { id: 'GEN_NUM_1000', name: '數值四捨五入至千位 (如 13,000)' },
+        { id: 'GEN_NUM_RANGE', name: '金額區間分類 (<5千/5千-2萬/2萬-5萬/5萬+)' }
+      ],
+      SUPPRESS: [
+        { id: 'SUPP_TEXT', name: '填入保護替代符號 ([已遮蔽])' },
+        { id: 'SUPP_NULL', name: '清空數值 (空字串 NULL)' },
+        { id: 'DROP_COLUMN', name: '完全移除此欄位 (匯出時徹底剃除)' }
+      ]
+    };
+
+    // Sensitive Field Detection Patterns
+    const DETECTION_PATTERNS = {
+      TW_ID: {
+        name: '台灣身分證字號',
+        headerRegex: /(身分證|身分証|身份證|id[_\s]?card|national[_\s]?id|nid|居留證)/i,
+        valueRegex: /^[A-Z][1289]\d{8}$/i,
+        defaultCategory: 'MASK',
+        defaultAction: 'MASK_ID',
+        suggestedTokenPrefix: 'ID'
+      },
+      MOBILE_PHONE: {
+        name: '行動電話 / 手機',
+        headerRegex: /(手機|行動電話|mobile|cellphone|cell|phone)/i,
+        valueRegex: /^09\d{2}[-\s]?\d{3}[-\s]?\d{3}$/,
+        defaultCategory: 'MASK',
+        defaultAction: 'MASK_PHONE',
+        suggestedTokenPrefix: 'TEL'
+      },
+      EMAIL: {
+        name: '電子郵件',
+        headerRegex: /(email|e-mail|信箱|電子郵件|郵箱)/i,
+        valueRegex: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
+        defaultCategory: 'MASK',
+        defaultAction: 'MASK_EMAIL',
+        suggestedTokenPrefix: 'MAIL'
+      },
+      NAME: {
+        name: '中文 / 英文姓名',
+        headerRegex: /(姓名|名字|客戶姓名|聯絡人|會員名稱|name|full[_\s]?name)/i,
+        valueRegex: /^[\u4e00-\u9fa5]{2,4}$/,
+        defaultCategory: 'MASK',
+        defaultAction: 'MASK_NAME',
+        suggestedTokenPrefix: 'USER'
+      },
+      ADDRESS: {
+        name: '住址 / 通訊地址',
+        headerRegex: /(地址|住址|通訊處|戶籍|address|addr)/i,
+        valueRegex: /(市|縣).*(區|鄉|鎮|市).*(路|街|巷|弄|號)/,
+        defaultCategory: 'GENERALIZE',
+        defaultAction: 'GEN_ADDR_DIST',
+        suggestedTokenPrefix: 'LOC'
+      },
+      BIRTHDAY: {
+        name: '出生年月日 / 日期',
+        headerRegex: /(生日|出生|出生日|birthday|birth|dob)/i,
+        valueRegex: /^\d{4}[-/.]\d{1,2}[-/.]\d{1,2}$/,
+        defaultCategory: 'GENERALIZE',
+        defaultAction: 'GEN_DATE_YEAR',
+        suggestedTokenPrefix: 'DATE'
+      },
+      AGE: {
+        name: '年齡 / 歲數',
+        headerRegex: /^(年齡|歲數|age)$/i,
+        valueRegex: /^(?:1[01][0-9]|120|[1-9]?[0-9])$/,
+        defaultCategory: 'GENERALIZE',
+        defaultAction: 'GEN_AGE_10Y',
+        suggestedTokenPrefix: 'AGE'
+      },
+      CREDIT_CARD: {
+        name: '信用卡號 / 支付帳號',
+        headerRegex: /(信用卡|卡號|credit[_\s]?card|card[_\s]?no|pan)/i,
+        valueRegex: /^\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}$/,
+        defaultCategory: 'MASK',
+        defaultAction: 'MASK_CARD',
+        suggestedTokenPrefix: 'PAY'
+      },
+      IP_ADDRESS: {
+        name: 'IP 位址',
+        headerRegex: /(ip[_\s]?address|ip位址|使用者ip)/i,
+        valueRegex: /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
+        defaultCategory: 'MASK',
+        defaultAction: 'MASK_IP',
+        suggestedTokenPrefix: 'IP'
+      }
+    };
+
+    function analyzeColumns() {
+      AppState.columnConfigs = {};
+      AppState.tokenMappings = {};
+
+      AppState.rawHeaders.forEach(col => {
+        let detectedType = null;
+        let matchReason = '';
+
+        // Check header name match first
+        for (const [key, pattern] of Object.entries(DETECTION_PATTERNS)) {
+          if (pattern.headerRegex.test(col)) {
+            detectedType = key;
+            matchReason = '欄位名稱吻合';
+            break;
+          }
+        }
+
+        // Check sample rows if not identified by header
+        if (!detectedType && AppState.rawRows.length > 0) {
+          const sampleRows = AppState.rawRows.slice(0, 10);
+          for (const [key, pattern] of Object.entries(DETECTION_PATTERNS)) {
+            const matches = sampleRows.filter(row => {
+              const val = String(row[col] || '').trim();
+              return val && pattern.valueRegex.test(val);
+            });
+            if (matches.length >= 2 || (matches.length > 0 && sampleRows.length <= 3)) {
+              detectedType = key;
+              matchReason = '資料格式相符';
+              break;
+            }
+          }
+        }
+
+        const defaultCategory = detectedType ? DETECTION_PATTERNS[detectedType].defaultCategory : 'KEEP';
+        const defaultAction = detectedType ? DETECTION_PATTERNS[detectedType].defaultAction : 'NONE';
+        const defaultPrefix = detectedType ? DETECTION_PATTERNS[detectedType].suggestedTokenPrefix : 'TOK';
+
+        AppState.columnConfigs[col] = {
+          detectedType: detectedType,
+          matchReason: matchReason,
+          category: defaultCategory,
+          action: defaultAction,
+          param: defaultPrefix, // used for token prefix or mask count
+        };
+
+        // Initialize token mapping store for this column
+        AppState.tokenMappings[col] = {
+          valToToken: new Map(),
+          tokenToVal: new Map(),
+          counter: 1
+        };
+      });
+    }
+
+    // Synchronous Hash calculation with optional Salt
+    function calcHash(str, salt = '', length = 64) {
+      const combined = str + (salt || AppState.hashSalt || '');
+      let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+      for (let i = 0; i < combined.length; i++) {
+        const ch = combined.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+      }
+      h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+      h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+      const hex1 = ('00000000' + (h1 >>> 0).toString(16)).slice(-8);
+      const hex2 = ('00000000' + (h2 >>> 0).toString(16)).slice(-8);
+      const hex3 = ('00000000' + ((h1 ^ h2) >>> 0).toString(16)).slice(-8);
+      const hex4 = ('00000000' + ((h1 + h2) >>> 0).toString(16)).slice(-8);
+      const fullHex = (hex1 + hex2 + hex3 + hex4 + hex2 + hex1 + hex4 + hex3).toUpperCase();
+      return fullHex.slice(0, length);
+    }
+
+    function getOrCreateToken(col, rawVal, type = 'TOKEN_SEQ', prefix = 'ID') {
+      if (!rawVal) return '';
+      if (!AppState.tokenMappings[col]) {
+        AppState.tokenMappings[col] = { valToToken: new Map(), tokenToVal: new Map(), counter: 1 };
+      }
+      const store = AppState.tokenMappings[col];
+      if (store.valToToken.has(rawVal)) {
+        return store.valToToken.get(rawVal);
+      }
+
+      let token = '';
+      if (type === 'TOKEN_SEQ') {
+        const seqStr = String(store.counter).padStart(4, '0');
+        token = `${prefix || 'ID'}_${seqStr}`;
+        store.counter++;
+      } else if (type === 'TOKEN_UUID') {
+        const rand = calcHash(rawVal, 'UUID_SALT', 4);
+        token = `TK-${rand}`;
+      } else if (type === 'TOKEN_PSEUDO_NAME') {
+        token = `訪客_${String.fromCharCode(65 + (store.counter % 26))}${store.counter}`;
+        store.counter++;
+      } else if (type === 'TOKEN_CATEGORY') {
+        token = `[分類標籤-${store.counter}]`;
+        store.counter++;
+      }
+
+      store.valToToken.set(rawVal, token);
+      store.tokenToVal.set(token, rawVal);
+      return token;
+    }
+
+    function applyTransformation(val, config, col) {
+      if (val === null || val === undefined) return '';
+      const str = String(val).trim();
+      if (!str) return '';
+
+      const action = config.action;
+      const param = config.param || '';
+
+      switch (action) {
+        // === 保留 ===
+        case 'NONE':
+          return str;
+
+        // === 遮蔽 (Masking) ===
+        case 'MASK_AUTO': {
+          if (config.detectedType && DETECTION_PATTERNS[config.detectedType]) {
+            const fallbackAction = DETECTION_PATTERNS[config.detectedType].defaultAction;
+            return applyTransformation(val, { ...config, action: fallbackAction }, col);
+          }
+          // Default: mask middle half
+          const len = str.length;
+          if (len <= 2) return '*'.repeat(len);
+          const q = Math.max(1, Math.floor(len / 4));
+          return str.substring(0, q) + '*'.repeat(len - q * 2) + str.substring(len - q);
+        }
+
+        case 'MASK_ID': {
+          if (str.length >= 10) {
+            return str.substring(0, 3) + '****' + str.substring(7);
+          }
+          return str.length > 3 ? str[0] + '****' + str.slice(-2) : '****';
+        }
+
+        case 'MASK_PHONE': {
+          const clean = str.replace(/[-\s]/g, '');
+          if (clean.length === 10 && clean.startsWith('09')) {
+            return clean.substring(0, 4) + '-***-' + clean.substring(7);
+          }
+          if (str.length >= 8) {
+            const mid = Math.floor(str.length / 2);
+            return str.substring(0, mid - 2) + '****' + str.substring(mid + 2);
+          }
+          return '09**-***-***';
+        }
+
+        case 'MASK_EMAIL': {
+          const atIndex = str.indexOf('@');
+          if (atIndex > 1) {
+            const name = str.substring(0, atIndex);
+            const domain = str.substring(atIndex);
+            return name.charAt(0) + '***' + domain;
+          }
+          return '****@domain.com';
+        }
+
+        case 'MASK_NAME': {
+          if (str.length === 2) {
+            return str[0] + '*';
+          } else if (str.length === 3) {
+            return str[0] + '*' + str[2];
+          } else if (str.length > 3) {
+            return str[0] + '*'.repeat(str.length - 2) + str[str.length - 1];
+          }
+          return '*';
+        }
+
+        case 'MASK_CARD': {
+          const clean = str.replace(/[-\s]/g, '');
+          if (clean.length >= 12) {
+            return '****-****-****-' + clean.slice(-4);
+          }
+          return '****-****-****-****';
+        }
+
+        case 'MASK_IP': {
+          const parts = str.split('.');
+          if (parts.length === 4) {
+            return `${parts[0]}.${parts[1]}.${parts[2]}.xxx`;
+          }
+          return 'xxx.xxx.xxx.xxx';
+        }
+
+        case 'MASK_KEEP_START': {
+          const keepCount = parseInt(param, 10) || 3;
+          if (str.length <= keepCount) return str;
+          return str.substring(0, keepCount) + '*'.repeat(str.length - keepCount);
+        }
+
+        case 'MASK_KEEP_END': {
+          const keepCount = parseInt(param, 10) || 3;
+          if (str.length <= keepCount) return str;
+          return '*'.repeat(str.length - keepCount) + str.substring(str.length - keepCount);
+        }
+
+        case 'MASK_FULL': {
+          return '********';
+        }
+
+        // === 代碼化 (Tokenization) ===
+        case 'TOKEN_SEQ':
+        case 'TOKEN_UUID':
+        case 'TOKEN_PSEUDO_NAME':
+        case 'TOKEN_CATEGORY':
+          return getOrCreateToken(col, str, action, param || 'ID');
+
+        // === 安全雜湊 (Hashing) ===
+        case 'HASH_SHA256_FULL':
+          return calcHash(str, AppState.hashSalt, 64);
+
+        case 'HASH_SHA256_SHORT':
+          return 'H#' + calcHash(str, AppState.hashSalt, 8);
+
+        case 'HASH_NUMERIC': {
+          const hex = calcHash(str, AppState.hashSalt, 8);
+          const num = parseInt(hex, 16) % 100000000;
+          return String(num).padStart(8, '0');
+        }
+
+        // === 泛化處理 (Generalization) ===
+        case 'GEN_DATE_YEAR': {
+          const m = str.match(/(\d{4})/);
+          return m ? `${m[1]} 年` : str;
+        }
+
+        case 'GEN_DATE_MONTH': {
+          const m = str.match(/^(\d{4})[-/.年](\d{1,2})/);
+          if (m) {
+            const mm = m[2].padStart(2, '0');
+            return `${m[1]}-${mm}`;
+          }
+          return str;
+        }
+
+        case 'GEN_DATE_DECADE': {
+          const m = str.match(/(\d{4})/);
+          if (m) {
+            const yr = parseInt(m[1], 10);
+            const dec = Math.floor(yr / 10) * 10;
+            return `${dec} 年代 (${dec}s)`;
+          }
+          return str;
+        }
+
+        case 'GEN_DATE_SHIFT': {
+          const d = new Date(str);
+          if (!isNaN(d.getTime())) {
+            const shifted = new Date(d.getTime() + AppState.dateShiftOffset * 86400000);
+            return shifted.toISOString().split('T')[0];
+          }
+          return str;
+        }
+
+        case 'GEN_AGE_5Y': {
+          const num = parseInt(str, 10);
+          if (!isNaN(num)) {
+            const lower = Math.floor(num / 5) * 5;
+            return `${lower}-${lower + 4} 歲`;
+          }
+          return str;
+        }
+
+        case 'GEN_AGE_10Y': {
+          const num = parseInt(str, 10);
+          if (!isNaN(num)) {
+            const lower = Math.floor(num / 10) * 10;
+            return `${lower}-${lower + 9} 歲`;
+          }
+          return str;
+        }
+
+        case 'GEN_AGE_STAGE': {
+          const num = parseInt(str, 10);
+          if (!isNaN(num)) {
+            if (num < 18) return '未成年 (<18)';
+            if (num < 40) return '青壯年族群 (18-39)';
+            if (num < 65) return '中年族群 (40-64)';
+            return '樂齡銀髮族 (65+)';
+          }
+          return str;
+        }
+
+        case 'GEN_ADDR_CITY': {
+          const m = str.match(/^([\u4e00-\u9fa5]{2,3}(?:市|縣))/);
+          return m ? m[1] + '***' : str.substring(0, 3) + '***';
+        }
+
+        case 'GEN_ADDR_DIST': {
+          const m = str.match(/^([\u4e00-\u9fa5]{2,3}(?:市|縣)[\u4e00-\u9fa5]{1,3}(?:區|鄉|鎮|市))/);
+          return m ? m[1] + '***' : str.substring(0, 6) + '***';
+        }
+
+        case 'GEN_ADDR_POSTAL': {
+          const m = str.match(/^(\d{3})/);
+          return m ? `[郵遞區號 ${m[1]}***]` : '[郵遞區號 ***]';
+        }
+
+        case 'GEN_NUM_100': {
+          const n = parseFloat(str.replace(/,/g, ''));
+          if (!isNaN(n)) return (Math.round(n / 100) * 100).toLocaleString();
+          return str;
+        }
+
+        case 'GEN_NUM_1000': {
+          const n = parseFloat(str.replace(/,/g, ''));
+          if (!isNaN(n)) return (Math.round(n / 1000) * 1000).toLocaleString();
+          return str;
+        }
+
+        case 'GEN_NUM_RANGE': {
+          const n = parseFloat(str.replace(/,/g, ''));
+          if (!isNaN(n)) {
+            if (n < 5000) return '5,000 元以下';
+            if (n < 20000) return '5,000 - 20,000 元';
+            if (n < 50000) return '20,000 - 50,000 元';
+            return '50,000 元以上 (高資產/高額消費)';
+          }
+          return str;
+        }
+
+        // === 抑制 / 移除 (Suppression) ===
+        case 'SUPP_TEXT':
+          return '[已遮蔽保密]';
+
+        case 'SUPP_NULL':
+          return '';
+
+        case 'DROP_COLUMN':
+          return '[已剔除此欄]';
+
+        default:
+          return str;
+      }
+    }
+
+    function renderRulesTable() {
+      const tbody = document.getElementById('rulesTableBody');
+      tbody.innerHTML = '';
+
+      AppState.rawHeaders.forEach(col => {
+        const config = AppState.columnConfigs[col];
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/80 transition-colors border-b border-slate-100';
+
+        // Sample raw value
+        const sampleVal = AppState.rawRows[0] ? String(AppState.rawRows[0][col] || '') : '-';
+        const samplePreview = applyTransformation(sampleVal, config, col);
+
+        // Detected badge
+        let typeBadge = '<span class="text-xs text-slate-400 font-normal">一般資料</span>';
+        if (config.detectedType) {
+          const typeInfo = DETECTION_PATTERNS[config.detectedType];
+          typeBadge = `
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+              <i class="fa-solid fa-triangle-exclamation mr-1 text-rose-500"></i> ${typeInfo.name}
+            </span>
+          `;
+        }
+
+        // Category options
+        const categoryOptionsHtml = Object.entries(STRATEGY_CATEGORIES).map(([catKey, catVal]) => {
+          return `<option value="${catKey}" ${config.category === catKey ? 'selected' : ''}>${catVal.label}</option>`;
+        }).join('');
+
+        // Action options based on selected category
+        const availableActions = STRATEGY_ACTIONS[config.category] || STRATEGY_ACTIONS.KEEP;
+        const actionOptionsHtml = availableActions.map(act => {
+          return `<option value="${act.id}" ${config.action === act.id ? 'selected' : ''}>${act.name}</option>`;
+        }).join('');
+
+        // Parameter input visibility & placeholder
+        let paramPlaceholder = '無須參數';
+        let isParamEnabled = false;
+        if (config.category === 'TOKENIZE' && config.action === 'TOKEN_SEQ') {
+          paramPlaceholder = '自訂代碼前綴 (如 ID, CUST)';
+          isParamEnabled = true;
+        } else if (config.action === 'MASK_KEEP_START' || config.action === 'MASK_KEEP_END') {
+          paramPlaceholder = '保留碼數 (預設3)';
+          isParamEnabled = true;
+        }
+
+        tr.innerHTML = `
+          <td class="py-3 px-3 font-semibold text-slate-800">
+            <div class="flex items-center space-x-1">
+              <span class="truncate max-w-[120px]" title="${col}">${col}</span>
+            </div>
+          </td>
+          <td class="py-3 px-3">
+            ${typeBadge}
+            ${config.matchReason ? `<span class="block text-[11px] text-slate-400">${config.matchReason}</span>` : ''}
+          </td>
+          <td class="py-3 px-3">
+            <select data-col="${col}" class="category-select w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+              ${categoryOptionsHtml}
+            </select>
+          </td>
+          <td class="py-3 px-3">
+            <select data-col="${col}" class="action-select w-full text-xs font-medium bg-white border border-slate-300 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+              ${actionOptionsHtml}
+            </select>
+          </td>
+          <td class="py-3 px-3">
+            <input type="text" data-col="${col}" class="param-input w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 ${isParamEnabled ? 'bg-white text-slate-800 focus:border-indigo-500' : 'bg-slate-50 text-slate-400 cursor-not-allowed'}" 
+              placeholder="${paramPlaceholder}" value="${isParamEnabled ? (config.param || '') : ''}" ${isParamEnabled ? '' : 'disabled'}>
+          </td>
+          <td class="py-3 px-3">
+            <span class="preview-target font-mono text-xs ${config.category !== 'KEEP' ? 'text-indigo-700 font-semibold bg-indigo-50 px-2 py-1 rounded border border-indigo-100 inline-block max-w-[170px] truncate' : 'text-slate-500'}" title="${samplePreview}">
+              ${samplePreview || '<span class="text-slate-300">空白</span>'}
+            </span>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+
+      // Bind category change listeners
+      tbody.querySelectorAll('.category-select').forEach(select => {
+        select.addEventListener('change', (e) => {
+          const colName = e.target.getAttribute('data-col');
+          const newCategory = e.target.value;
+          AppState.columnConfigs[colName].category = newCategory;
+          // default to first action of this category
+          const defaultAction = STRATEGY_ACTIONS[newCategory][0].id;
+          AppState.columnConfigs[colName].action = defaultAction;
+          updateUI();
+          showToast(`已切換「${colName}」為【${STRATEGY_CATEGORIES[newCategory].label.split(' ')[0]}】策略`);
+        });
+      });
+
+      // Bind action change listeners
+      tbody.querySelectorAll('.action-select').forEach(select => {
+        select.addEventListener('change', (e) => {
+          const colName = e.target.getAttribute('data-col');
+          const newAction = e.target.value;
+          AppState.columnConfigs[colName].action = newAction;
+          updateUI();
+        });
+      });
+
+      // Bind param input listeners
+      tbody.querySelectorAll('.param-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const colName = e.target.getAttribute('data-col');
+          AppState.columnConfigs[colName].param = e.target.value;
+          renderPreviewTable();
+        });
+      });
+    }
+
+    function renderPreviewTable() {
+      const thead = document.getElementById('previewTableHead');
+      const tbody = document.getElementById('previewTableBody');
+      const isSanitized = AppState.currentTab === 'sanitized';
+
+      // If sanitized, we filter out dropped columns if set to DROP_COLUMN
+      const displayHeaders = isSanitized
+        ? AppState.rawHeaders.filter(col => AppState.columnConfigs[col].action !== 'DROP_COLUMN')
+        : AppState.rawHeaders;
+
+      // Headers
+      thead.innerHTML = `
+        <tr>
+          <th class="py-2.5 px-3 w-12 text-center text-slate-400">#</th>
+          ${displayHeaders.map(col => {
+            const config = AppState.columnConfigs[col];
+            const isModified = isSanitized && config && config.category !== 'KEEP';
+            return `
+              <th class="py-2.5 px-3 font-semibold text-xs whitespace-nowrap ${isModified ? 'text-indigo-700 bg-indigo-50/70' : 'text-slate-600'}">
+                <div class="flex items-center space-x-1">
+                  <span>${col}</span>
+                  ${isModified ? '<i class="fa-solid fa-wand-magic-sparkles text-[10px] text-indigo-500 ml-1"></i>' : ''}
+                </div>
+              </th>
+            `;
+          }).join('')}
+        </tr>
+      `;
+
+      // Rows (Preview up to 15 rows)
+      const previewSlice = AppState.rawRows.slice(0, 15);
+      tbody.innerHTML = previewSlice.map((row, idx) => {
+        return `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="py-2 px-3 text-center font-mono text-slate-400 text-[11px]">${idx + 1}</td>
+            ${displayHeaders.map(col => {
+              const rawVal = row[col];
+              const config = AppState.columnConfigs[col];
+              let displayVal = rawVal;
+              let isModified = false;
+
+              if (isSanitized && config && config.category !== 'KEEP') {
+                displayVal = applyTransformation(rawVal, config, col);
+                isModified = true;
+              }
+
+              return `
+                <td class="py-2 px-3 whitespace-nowrap font-mono text-xs ${isModified ? 'text-indigo-600 font-medium bg-indigo-50/30' : 'text-slate-700'}">
+                  ${displayVal !== undefined && displayVal !== '' ? displayVal : '<span class="text-slate-300">-</span>'}
+                </td>
+              `;
+            }).join('')}
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('previewRowInfo').textContent = `顯示前 ${previewSlice.length} 筆（共 ${AppState.rawRows.length} 筆資料）`;
+    }
+
+    function generateSanitizedDataset() {
+      // Exclude columns configured as DROP_COLUMN
+      const activeHeaders = AppState.rawHeaders.filter(col => AppState.columnConfigs[col].action !== 'DROP_COLUMN');
+
+      return AppState.rawRows.map(row => {
+        const newRow = {};
+        activeHeaders.forEach(col => {
+          const config = AppState.columnConfigs[col];
+          const rawVal = row[col];
+          newRow[col] = config && config.category !== 'KEEP' ? applyTransformation(rawVal, config, col) : rawVal;
+        });
+        return newRow;
+      });
+    }
+
+    // Salt input listener
+    document.getElementById('hashSaltInput').addEventListener('input', (e) => {
+      AppState.hashSalt = e.target.value;
+      renderRulesTable();
+      renderPreviewTable();
+    });
+
+    // Batch Action: Tokenize all sensitive columns
+    document.getElementById('btnBatchTokenize').addEventListener('click', () => {
+      AppState.rawHeaders.forEach(col => {
+        const cfg = AppState.columnConfigs[col];
+        if (cfg.detectedType) {
+          cfg.category = 'TOKENIZE';
+          cfg.action = 'TOKEN_SEQ';
+          cfg.param = DETECTION_PATTERNS[cfg.detectedType]?.suggestedTokenPrefix || 'TOK';
+        }
+      });
+      updateUI();
+      showToast('已將所有敏感欄位批次設為「代碼化 (Tokenization)」');
+    });
+
+    // Batch Action: Mask all sensitive columns
+    document.getElementById('btnBatchMask').addEventListener('click', () => {
+      AppState.rawHeaders.forEach(col => {
+        const cfg = AppState.columnConfigs[col];
+        if (cfg.detectedType) {
+          cfg.category = 'MASK';
+          cfg.action = DETECTION_PATTERNS[cfg.detectedType]?.defaultAction || 'MASK_AUTO';
+        }
+      });
+      updateUI();
+      showToast('已將所有敏感欄位批次設為「部分遮蔽 (Masking)」');
+    });
+
+    // Export Token Mapping Key Table (CSV)
+    document.getElementById('btnExportMapping').addEventListener('click', () => {
+      const mappingRows = [];
+      mappingRows.push(['欄位名稱', '原始數值 (Original Value)', '去識別化代碼 (Token / Pseudonym)']);
+
+      let totalMapped = 0;
+      Object.keys(AppState.tokenMappings).forEach(col => {
+        const store = AppState.tokenMappings[col];
+        if (store && store.valToToken.size > 0) {
+          store.valToToken.forEach((token, rawVal) => {
+            mappingRows.push([col, rawVal, token]);
+            totalMapped++;
+          });
+        }
+      });
+
+      if (totalMapped === 0) {
+        showToast('目前無任何欄位使用代碼化/假名化對照資料', 'error');
+        return;
+      }
+
+      const csvContent = mappingRows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+      const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const originalName = (AppState.rawFileName || 'data').replace(/\.[^/.]+$/, "");
+      const exportFileName = `${originalName}_代碼對照密鑰表_${new Date().toISOString().slice(0, 10)}.csv`;
+
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = exportFileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showToast(`已匯出代碼對照表，共 ${totalMapped} 筆對應代碼！`);
+    });
+
+    // Reset All Rules to Keep
+    document.getElementById('btnResetRules').addEventListener('click', () => {
+      AppState.rawHeaders.forEach(col => {
+        AppState.columnConfigs[col].category = 'KEEP';
+        AppState.columnConfigs[col].action = 'NONE';
+      });
+      updateUI();
+      showToast('已重設所有欄位為保留原值');
+    });
+
+    // Update stats counting active rules
+    function updateUI() {
+      document.getElementById('statsSection').classList.remove('hidden');
+      document.getElementById('configSection').classList.remove('hidden');
+      document.getElementById('previewSection').classList.remove('hidden');
+
+      document.getElementById('statFileName').textContent = AppState.rawFileName;
+      document.getElementById('statRowCount').textContent = `${AppState.rawRows.length} 筆資料`;
+
+      let sensitiveCount = 0;
+      let activeRulesCount = 0;
+
+      Object.values(AppState.columnConfigs).forEach(cfg => {
+        if (cfg.detectedType) sensitiveCount++;
+        if (cfg.category !== 'KEEP') activeRulesCount++;
+      });
+
+      document.getElementById('statSensitiveCols').textContent = `${sensitiveCount} 個欄位`;
+      document.getElementById('statActiveRules').textContent = `${activeRulesCount} 個欄位`;
+      document.getElementById('ruleCountBadge').textContent = `${AppState.rawHeaders.length} 個總欄位`;
+
+      const privacyEl = document.getElementById('statPrivacyLevel');
+      if (activeRulesCount >= sensitiveCount && sensitiveCount > 0) {
+        privacyEl.textContent = '高等隱私保護';
+        privacyEl.className = 'text-base font-bold text-emerald-600';
+      } else if (activeRulesCount > 0) {
+        privacyEl.textContent = '中等保護';
+        privacyEl.className = 'text-base font-bold text-amber-600';
+      } else {
+        privacyEl.textContent = '未保護 (原值)';
+        privacyEl.className = 'text-base font-bold text-rose-600';
+      }
+
+      renderRulesTable();
+      renderPreviewTable();
+    }
+
+    function renderRulesTable() {
+      const tbody = document.getElementById('rulesTableBody');
+      tbody.innerHTML = '';
+
+      AppState.rawHeaders.forEach(col => {
+        const config = AppState.columnConfigs[col];
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/80 transition-colors';
+
+        // Sample value
+        const sampleVal = AppState.rawRows[0] ? String(AppState.rawRows[0][col] || '') : '-';
+        const samplePreview = applyTransformation(sampleVal, config.action);
+
+        // Detected badge
+        let typeBadge = '<span class="text-xs text-slate-400 font-normal">一般欄位</span>';
+        if (config.detectedType) {
+          const typeInfo = DETECTION_PATTERNS[config.detectedType];
+          typeBadge = `
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+              <i class="fa-solid fa-triangle-exclamation mr-1 text-rose-500"></i> ${typeInfo.name}
+            </span>
+          `;
+        }
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-semibold text-slate-800">
+            <div class="flex items-center space-x-1.5">
+              <span>${col}</span>
+            </div>
+          </td>
+          <td class="py-3 px-4">
+            ${typeBadge}
+            ${config.matchReason ? `<span class="block text-[11px] text-slate-400">${config.matchReason}</span>` : ''}
+          </td>
+          <td class="py-3 px-4 text-xs font-mono text-slate-600 truncate max-w-[160px]" title="${sampleVal}">
+            ${sampleVal || '<span class="text-slate-300">空白</span>'}
+          </td>
+          <td class="py-3 px-4">
+            <select data-col="${col}" class="action-select w-full text-xs font-medium bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+              <optgroup label="保持原狀">
+                <option value="NONE" ${config.action === 'NONE' ? 'selected' : ''}>保留原值 (不做任何處理)</option>
+              </optgroup>
+              <optgroup label="遮罩處理 (Masking)">
+                <option value="MASK_ID" ${config.action === 'MASK_ID' ? 'selected' : ''}>身分證遮罩 (A12****789)</option>
+                <option value="MASK_PHONE" ${config.action === 'MASK_PHONE' ? 'selected' : ''}>手機遮罩 (0912-***-678)</option>
+                <option value="MASK_EMAIL" ${config.action === 'MASK_EMAIL' ? 'selected' : ''}>電子郵件遮罩 (a***@mail.com)</option>
+                <option value="MASK_NAME" ${config.action === 'MASK_NAME' ? 'selected' : ''}>姓名中間字遮罩 (王*明)</option>
+                <option value="MASK_CARD" ${config.action === 'MASK_CARD' ? 'selected' : ''}>信用卡末四碼 (****-****-****-1234)</option>
+                <option value="MASK_IP" ${config.action === 'MASK_IP' ? 'selected' : ''}>IP 末段遮罩 (192.168.1.xxx)</option>
+                <option value="MASK_CUSTOM_HALF" ${config.action === 'MASK_CUSTOM_HALF' ? 'selected' : ''}>通用中間字元遮罩 (保留頭尾)</option>
+              </optgroup>
+              <optgroup label="泛化處理 (Generalization)">
+                <option value="GEN_ADDRESS_CITY" ${config.action === 'GEN_ADDRESS_CITY' ? 'selected' : ''}>地址泛化至縣市 (台北市***)</option>
+                <option value="GEN_ADDRESS_DISTRICT" ${config.action === 'GEN_ADDRESS_DISTRICT' ? 'selected' : ''}>地址泛化至鄉鎮市區 (台北市信義區***)</option>
+                <option value="GEN_AGE_RANGE" ${config.action === 'GEN_AGE_RANGE' ? 'selected' : ''}>年齡泛化 (20-29 歲區間)</option>
+                <option value="GEN_DATE_YEAR" ${config.action === 'GEN_DATE_YEAR' ? 'selected' : ''}>日期泛化為年份 (1994 年)</option>
+                <option value="GEN_DATE_MONTH" ${config.action === 'GEN_DATE_MONTH' ? 'selected' : ''}>日期泛化為年月 (1994-08)</option>
+                <option value="GEN_ROUND_100" ${config.action === 'GEN_ROUND_100' ? 'selected' : ''}>金額數值四捨五入至百位</option>
+              </optgroup>
+              <optgroup label="進階匿名與移除">
+                <option value="HASH_SHA256" ${config.action === 'HASH_SHA256' ? 'selected' : ''}>不可逆假名雜湊 (ID-XXXXXX)</option>
+                <option value="DROP_COLUMN" ${config.action === 'DROP_COLUMN' ? 'selected' : ''}>清空欄位值 ([已移除])</option>
+              </optgroup>
+            </select>
+          </td>
+          <td class="py-3 px-4">
+            <span class="preview-target font-mono text-xs ${config.action !== 'NONE' ? 'text-indigo-600 font-semibold bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100' : 'text-slate-500'}">
+              ${samplePreview}
+            </span>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+
+      // Bind change listeners to select elements
+      tbody.querySelectorAll('.action-select').forEach(select => {
+        select.addEventListener('change', (e) => {
+          const colName = e.target.getAttribute('data-col');
+          const newAction = e.target.value;
+          AppState.columnConfigs[colName].action = newAction;
+
+          // Re-render UI
+          updateUI();
+          showToast(`已更新「${colName}」處理規則`);
+        });
+      });
+    }
+
+    function renderPreviewTable() {
+      const thead = document.getElementById('previewTableHead');
+      const tbody = document.getElementById('previewTableBody');
+      const isSanitized = AppState.currentTab === 'sanitized';
+
+      // Headers
+      thead.innerHTML = `
+        <tr>
+          <th class="py-2.5 px-4 w-12 text-center text-slate-400">#</th>
+          ${AppState.rawHeaders.map(col => {
+            const config = AppState.columnConfigs[col];
+            const isModified = isSanitized && config && config.action !== 'NONE';
+            return `
+              <th class="py-2.5 px-4 font-semibold text-xs whitespace-nowrap ${isModified ? 'text-indigo-700 bg-indigo-50/70' : 'text-slate-600'}">
+                <div class="flex items-center space-x-1">
+                  <span>${col}</span>
+                  ${isModified ? '<i class="fa-solid fa-wand-magic-sparkles text-[10px] text-indigo-500 ml-1"></i>' : ''}
+                </div>
+              </th>
+            `;
+          }).join('')}
+        </tr>
+      `;
+
+      // Rows (Preview up to 15 rows)
+      const previewSlice = AppState.rawRows.slice(0, 15);
+      tbody.innerHTML = previewSlice.map((row, idx) => {
+        return `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="py-2 px-4 text-center font-mono text-slate-400 text-[11px]">${idx + 1}</td>
+            ${AppState.rawHeaders.map(col => {
+              const rawVal = row[col];
+              const config = AppState.columnConfigs[col];
+              let displayVal = rawVal;
+              let isModified = false;
+
+              if (isSanitized && config && config.action !== 'NONE') {
+                displayVal = applyTransformation(rawVal, config.action);
+                isModified = true;
+              }
+
+              return `
+                <td class="py-2 px-4 whitespace-nowrap font-mono text-xs ${isModified ? 'text-indigo-600 font-medium bg-indigo-50/30' : 'text-slate-700'}">
+                  ${displayVal !== undefined && displayVal !== '' ? displayVal : '<span class="text-slate-300">-</span>'}
+                </td>
+              `;
+            }).join('')}
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('previewRowInfo').textContent = `顯示前 ${previewSlice.length} 筆（共 ${AppState.rawRows.length} 筆資料）`;
+    }
+
+    const tabPreviewSanitized = document.getElementById('tabPreviewSanitized');
+    const tabPreviewOriginal = document.getElementById('tabPreviewOriginal');
+
+    tabPreviewSanitized.addEventListener('click', () => {
+      AppState.currentTab = 'sanitized';
+      tabPreviewSanitized.className = 'px-3 py-1 font-semibold rounded-md bg-white text-indigo-700 shadow-sm';
+      tabPreviewOriginal.className = 'px-3 py-1 font-semibold rounded-md text-slate-600 hover:text-slate-900';
+      renderPreviewTable();
+    });
+
+    tabPreviewOriginal.addEventListener('click', () => {
+      AppState.currentTab = 'original';
+      tabPreviewOriginal.className = 'px-3 py-1 font-semibold rounded-md bg-white text-indigo-700 shadow-sm';
+      tabPreviewSanitized.className = 'px-3 py-1 font-semibold rounded-md text-slate-600 hover:text-slate-900';
+      renderPreviewTable();
+    });
+
+    // Auto Apply Recommended Rules
+    document.getElementById('btnAutoApplyAll').addEventListener('click', () => {
+      analyzeColumns();
+      updateUI();
+      showToast('已套用系統推薦之最佳匿名化規則！');
+    });
+
+    // Reset All Rules to None
+    document.getElementById('btnResetRules').addEventListener('click', () => {
+      AppState.rawHeaders.forEach(col => {
+        AppState.columnConfigs[col].action = 'NONE';
+      });
+      updateUI();
+      showToast('已重設所有欄位為保留原值');
+    });
+
+    function generateSanitizedDataset() {
+      return AppState.rawRows.map(row => {
+        const newRow = {};
+        AppState.rawHeaders.forEach(col => {
+          const config = AppState.columnConfigs[col];
+          const rawVal = row[col];
+          newRow[col] = config && config.action !== 'NONE' ? applyTransformation(rawVal, config.action) : rawVal;
+        });
+        return newRow;
+      });
+    }
+
+    // Export to Excel (.xlsx)
+    document.getElementById('btnExportExcel').addEventListener('click', () => {
+      if (!AppState.rawRows.length) return;
+      try {
+        const cleanData = generateSanitizedDataset();
+        const ws = XLSX.utils.json_to_sheet(cleanData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "匿名化資料");
+
+        const originalName = AppState.rawFileName.replace(/\.[^/.]+$/, "");
+        const exportFileName = `${originalName}_匿名化_${new Date().toISOString().slice(0, 10)}.xlsx`;
+
+        XLSX.writeFile(wb, exportFileName);
+        showToast(`已成功下載 Excel 檔案：${exportFileName}`);
+      } catch (err) {
+        console.error(err);
+        showToast('匯出 Excel 失敗，請重試', 'error');
+      }
+    });
+
+    // Export to CSV (UTF-8 with BOM for Excel compatibility)
+    document.getElementById('btnExportCSV').addEventListener('click', () => {
+      if (!AppState.rawRows.length) return;
+      try {
+        const cleanData = generateSanitizedDataset();
+        const ws = XLSX.utils.json_to_sheet(cleanData);
+        const csvContent = XLSX.utils.sheet_to_csv(ws);
+
+        // Prepend UTF-8 BOM so Excel opens Traditional Chinese characters accurately
+        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const originalName = AppState.rawFileName.replace(/\.[^/.]+$/, "");
+        const exportFileName = `${originalName}_匿名化_${new Date().toISOString().slice(0, 10)}.csv`;
+
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", exportFileName);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        showToast(`已成功下載 CSV 檔案：${exportFileName}`);
+      } catch (err) {
+        console.error(err);
+        showToast('匯出 CSV 失敗，請重試', 'error');
+      }
+    });
+
+    document.getElementById('btnLoadDemo').addEventListener('click', () => {
+      const demoData = [
+        {
+          "客戶編號": "CUST-001",
+          "姓名": "陳大華",
+          "身分證字號": "A123456789",
+          "手機號碼": "0912-345-678",
+          "電子信箱": "dahua.chen@example.com",
+          "出生日期": "1988-05-16",
+          "年齡": "38",
+          "通訊住址": "台北市信義區市府路1號",
+          "信用卡號": "4123-5678-9012-3456",
+          "消費金額": "12500",
+          "登入IP": "210.61.12.85"
+        },
+        {
+          "客戶編號": "CUST-002",
+          "姓名": "林小芬",
+          "身分證字號": "B298765432",
+          "手機號碼": "0988-765-432",
+          "電子信箱": "fanny.lin@company.org.tw",
+          "出生日期": "1995-11-20",
+          "年齡": "31",
+          "通訊住址": "新北市板橋區縣民大道二段7號",
+          "信用卡號": "5421-8888-2233-9876",
+          "消費金額": "4320",
+          "登入IP": "114.34.88.190"
+        },
+        {
+          "客戶編號": "CUST-003",
+          "姓名": "張國樑",
+          "身分證字號": "D156789012",
+          "手機號碼": "0921-112-233",
+          "電子信箱": "kuoliang.chang@domain.net",
+          "出生日期": "1972-03-08",
+          "年齡": "54",
+          "通訊住址": "台中市西屯區台灣大道三段99號",
+          "信用卡號": "3566-7788-9900-1122",
+          "消費金額": "89000",
+          "登入IP": "60.248.15.20"
+        },
+        {
+          "客戶編號": "CUST-004",
+          "姓名": "黃怡婷",
+          "身分證字號": "E223456781",
+          "手機號碼": "0933-998-877",
+          "電子信箱": "yiting_huang@gmail.com",
+          "出生日期": "2001-09-02",
+          "年齡": "25",
+          "通訊住址": "高雄市苓雅區四維三路2號",
+          "信用卡號": "4532-1100-2244-7766",
+          "消費金額": "1800",
+          "登入IP": "122.117.45.66"
+        }
+      ];
+
+      AppState.rawFileName = '台灣用戶個資範例.xlsx';
+      AppState.rawHeaders = Object.keys(demoData[0]);
+      AppState.rawRows = demoData;
+
+      analyzeColumns();
+      updateUI();
+      showToast('已載入範例資料並自動識別敏感欄位！');
+    });
+
+    let toastTimeout;
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toastMsg.textContent = message;
+
+      if (type === 'error') {
+        toastIcon.className = 'fa-solid fa-circle-exclamation text-rose-400 text-base';
+      } else {
+        toastIcon.className = 'fa-solid fa-circle-check text-emerald-400 text-base';
+      }
+
+      toast.classList.remove('translate-y-16', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.add('translate-y-16', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

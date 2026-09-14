@@ -372,9 +372,9 @@ export const SKILL_CATEGORIES: SkillCategory[] = [
     ]
   },
   {
-    title: "外語認證與團隊協作",
+    title: "團隊協作與流程管理",
     skills: [
-      { name: "英文", level: "Proficient", highlight: "TOEIC 645 分（綠色證書，持續進修中）" },
+      { name: "英文溝通", level: "Advanced", highlight: "TOEIC 645 分（綠色證書，持續進修中）" },
       { name: "Scrum 敏捷開發 & 專案管理", level: "Master", highlight: "嚴謹遵循開發流程，運用 Jira、Trello 配合迭代" },
       { name: "API 與技術文檔撰寫", level: "Master", highlight: "以 Swagger、Postman、HackMD 產出零學習障礙文件，確保前端與 QA 完美接棒" },
       { name: "系統分析設計 & UML", level: "Advanced", highlight: "資管本科出身，熟稔 SA/SD 與 UML 塑模，精準將商業需求轉化為工程規格" }

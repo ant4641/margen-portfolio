@@ -40,7 +40,7 @@ export const TechStackMatrix: React.FC = () => {
                     <span className={`text-[11px] font-bold px-2 py-0.5 rounded ${skill.level === 'Master'
                         ? 'bg-emerald-950 text-emerald-400 border border-emerald-800'
                         : skill.level === 'Advanced'
-                          ? 'bg-[#131720] text-teal-300 border border-teal-800/60'
+                          ? 'bg-teal-950/50 text-teal-300 border border-teal-800/60'
                           : 'bg-[#131720] text-slate-300 border border-[#2D3748]'
                       }`}>
                       {skill.level === 'Master' ? '精通' : skill.level === 'Advanced' ? '熟練' : '良好'}

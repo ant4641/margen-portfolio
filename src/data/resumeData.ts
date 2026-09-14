@@ -54,7 +54,7 @@ export const MARGEN_PROFILE = {
     email: "hsinshanlin@gmail.com",
     phone: "0972109721",
     location: "台灣",
-    language: "中文 (母語), English",
+    language: "中文 (母語), 英文 (TOEIC 645 分綠色證書)",
   },
   corePositioning: [
     {
@@ -137,7 +137,7 @@ export const ESSENTIAL_HIGHLIGHTS: HighlightProject[] = [
       after: "線上備份完全不鎖表、節省 85% 磁碟，1,680 萬筆壓測零掉單，叢集穩定度高達 90%。",
       metric: "磁碟空間 -85% / 穩定度 90%"
     },
-    techStack: ["PHP (Laravel)", "ELK", "Kafka", "MariaDB", "Docker", "Shell Script", "Jest", "Git"]
+    techStack: ["PHP (Laravel)", "Vue.js", "ELK", "Kafka", "MariaDB", "Docker", "Shell Script", "Jest", "Git"]
   },
   {
     id: "financial-system",
@@ -223,14 +223,14 @@ export const WORK_HISTORY: WorkExperience[] = [
           "主導修復 205 個 Unit/Feature Test 檔案（負責 60% 以上約 350 個 Method），強化 CI/CD 流程穩定度，並建立前端 Jest E2E 自動化測試鏈。",
           "重構全球極端時區（UTC-11~+14）告警時間錨點演算法；將 Elasticsearch 通訊升級為 HTTPS，以內外分離架構達成零效能損耗與憑證安全連線。"
         ],
-        techStack: ["PHP (Laravel)", "ELK", "Kafka", "MariaDB", "Docker", "Shell Script", "Jest", "Git"]
+        techStack: ["PHP (Laravel)", "Vue.js", "ELK", "Kafka", "MariaDB", "Docker", "Shell Script", "Jest", "Git"]
       },
       {
         title: "【會員系統與交易平台開發】",
         highlights: [
           "整合 Paysafe 多元支付，對接點數卡、電子錢包、銀行轉帳與行動支付儲值管道；實作 Webhook 非同步回呼與交易冪等性，確保點數入帳零重複、零掉單。",
           "主導第三方支付技術分享，撰寫文件，向跨團隊簡報分享，提升後續擴充效率。",
-          "開發營運 CMS 模組，自訂公告與橫幅發布功能，降低高頻動態查詢對主資料庫的負載。"
+          "開發營運 CMS 模組，自訂公告與橫幅發布功能。"
         ],
         techStack: ["Java (Spring Boot)", "Redis", "Git"]
       }
@@ -328,7 +328,7 @@ export const WORK_HISTORY: WorkExperience[] = [
 
 export const SKILL_CATEGORIES: SkillCategory[] = [
   {
-    title: "後端核心與語言 (Backend & Core)",
+    title: "後端核心與語言",
     skills: [
       { name: "Java (Spring Boot)", level: "Master", highlight: "5+ 年商業實戰 / 證券與 IoT 系統" },
       { name: "PHP (Laravel)", level: "Master", highlight: "高併發日誌 / AdTech / 大型重構" },
@@ -337,7 +337,16 @@ export const SKILL_CATEGORIES: SkillCategory[] = [
     ]
   },
   {
-    title: "資料庫與數據流 (Databases & Streaming)",
+    title: "前端與跨平台技術",
+    skills: [
+      { name: "Vue.js", level: "Advanced", highlight: "集中式日誌平台後台 / 響應式 SPA / 元件模組化" },
+      { name: "Flutter", level: "Advanced", highlight: "跨平台 App 開發 / 行動端 UI 與 API 串接" },
+      { name: "JavaScript / TypeScript", level: "Advanced", highlight: "現代化 Web 應用 / 前端工程化與異步處理" },
+      { name: "HTML5 / CSS3 / Tailwind", level: "Advanced", highlight: "響應式排版 / 深淺色主題 / UI 元件庫" }
+    ]
+  },
+  {
+    title: "資料庫與數據流",
     skills: [
       { name: "MySQL / MariaDB", level: "Master", highlight: "MVCC / 零鎖表備份 / 90% 叢集穩定度" },
       { name: "MSSQL", level: "Advanced", highlight: "自動化備份 / 查詢速度提升 87%" },
@@ -346,7 +355,7 @@ export const SKILL_CATEGORIES: SkillCategory[] = [
     ]
   },
   {
-    title: "IoT 軟硬體整合協定 (IoT & Hardware Protocols)",
+    title: "IoT 軟硬體整合協定",
     skills: [
       { name: "Modbus TCP / IO Box", level: "Advanced", highlight: "閘門與感測器控制 / 工控串接" },
       { name: "RTSP 影音轉流", level: "Advanced", highlight: "50 隻攝影機畫面即時控管" },
@@ -354,12 +363,21 @@ export const SKILL_CATEGORIES: SkillCategory[] = [
     ]
   },
   {
-    title: "架構、DevOps 與測試 (Architecture & Ops)",
+    title: "架構、DevOps 與測試",
     skills: [
       { name: "DDD & SOLID 原則", level: "Master", highlight: "實戰落地於開戶與智慧場域" },
       { name: "Docker / Nginx / Linux", level: "Advanced", highlight: "容器化部署 / 內外分離 HTTPS Bridge" },
       { name: "Jest / Unit & Feature Test", level: "Advanced", highlight: "主導 205+ 測試檔修復 / CI/CD 穩定" },
       { name: "OpenCV & AI API 整合", level: "Advanced", highlight: "OCR 辨識 +12% / 即興劇 AI 生成" }
+    ]
+  },
+  {
+    title: "外語認證與團隊協作",
+    skills: [
+      { name: "英文", level: "Proficient", highlight: "TOEIC 645 分（綠色證書，持續進修中）" },
+      { name: "Scrum 敏捷開發 & 專案管理", level: "Master", highlight: "嚴謹遵循開發流程，運用 Jira、Trello 配合迭代" },
+      { name: "API 與技術文檔撰寫", level: "Master", highlight: "以 Swagger、Postman、HackMD 產出零學習障礙文件，確保前端與 QA 完美接棒" },
+      { name: "系統分析設計 & UML", level: "Advanced", highlight: "資管本科出身，熟稔 SA/SD 與 UML 塑模，精準將商業需求轉化為工程規格" }
     ]
   }
 ];

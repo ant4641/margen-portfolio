@@ -20,7 +20,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateTab }) => {
             職涯歷程
           </button>
           <button onClick={() => onNavigateTab('skills')} className="hover:text-emerald-400 transition-colors cursor-pointer">
-            技術矩陣
+            技術版圖
           </button>
         </div>
 

@@ -41,7 +41,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const navItems = [
     { id: 'home', label: '首頁', icon: Sparkles },
     { id: 'experience', label: '職涯歷程', icon: Briefcase },
-    { id: 'skills', label: '技術矩陣', icon: Code2 },
+    { id: 'skills', label: '技術版圖', icon: Code2 },
   ];
 
   const handleNavClick = (id: string) => {
